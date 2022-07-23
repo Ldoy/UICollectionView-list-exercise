@@ -40,4 +40,10 @@ class VideoCollectionViewCell: UICollectionViewCell {
       subtitleLabel.text = "\(video?.lessonCount ?? 0) lessons"
     }
   }
+  
+  enum Section {
+    case main
+  }
+  
+  typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
 }
