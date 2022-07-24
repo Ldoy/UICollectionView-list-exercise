@@ -29,18 +29,13 @@
 import UIKit
 import SafariServices
 
-
-enum Section {
-  case main
-}
-
 typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
 
 typealias Snaphot = NSDiffableDataSourceSnapshot<Section, Video>
 
 class VideosViewController: UICollectionViewController {
   // MARK: - Properties
-  private var videoList = Video.allVideos
+  private var sections = Section.allSections
   private var searchController = UISearchController(searchResultsController: nil)
   private lazy var dataSource = makeDataSource()
   // MARK: - Value Types
@@ -71,10 +66,14 @@ class VideosViewController: UICollectionViewController {
   func applySnapshot(animatedDifferences: Bool =  true) {
     var snapshot = Snaphot()
     
-    snapshot.appendSections([.main])
+    snapshot.appendSections(sections)
     
     //MARK: Add the video array to the snapshot.
-    snapshot.appendItems(videoList)
+    sections.forEach { section in
+      snapshot.appendItems(section.videos,
+                           toSection: section)
+
+    }
     
     //MARK: Tell the dataSource about the latest snapshot for updating and animating
     self.dataSource.apply(snapshot,
@@ -129,21 +128,40 @@ extension VideosViewController {
 // MARK: - UISearchResultsUpdating Delegate
 extension VideosViewController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
-    videoList = filteredVideos(for: searchController.searchBar.text)
-    collectionView.reloadData()
+    sections = filteredSections(for: searchController.searchBar.text)
+    //collectionView.reloadData()
+    applySnapshot()
   }
   
-  func filteredVideos(for queryOrNil: String?) -> [Video] {
-    let videos = Video.allVideos
+  func filteredSections(for queryOrNil: String?) -> [Section] {
+    let sections = Section.allSections
     guard
       let query = queryOrNil,
-      !query.isEmpty
-    else {
-      return videos
+      !query.isEmpty else {
+      return sections
     }
-    return videos.filter {
-      return $0.title.lowercased().contains(query.lowercased())
+    
+    return sections.filter { section in
+      var mathces = section.title.lowercased().contains(query.lowercased())
+      
+      for video in section.videos {
+        if video.title.lowercased().contains(query.lowercased()) {
+          mathces = true
+          break
+        }
+      }
+      return mathces
     }
+//    let videos = self.sections
+//    guard
+//      let query = queryOrNil,
+//      !query.isEmpty
+//    else {
+//      return videos
+//    }
+//    return videos.filter {
+//      return $0.title.lowercased().contains(query.lowercased())
+//    }
   }
   
   func configureSearchController() {
