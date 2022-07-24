@@ -33,6 +33,7 @@ class VideoCollectionViewCell: UICollectionViewCell {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var subtitleLabel: UILabel!
   
+  //MARK: - Use Property Observer for giving data.
   var video: Video? {
     didSet {
       thumbnailView.image = video?.thumbnail
@@ -40,10 +41,4 @@ class VideoCollectionViewCell: UICollectionViewCell {
       subtitleLabel.text = "\(video?.lessonCount ?? 0) lessons"
     }
   }
-  
-  enum Section {
-    case main
-  }
-  
-  typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
 }
