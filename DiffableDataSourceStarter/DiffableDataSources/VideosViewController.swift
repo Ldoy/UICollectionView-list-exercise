@@ -47,7 +47,18 @@ class VideosViewController: UICollectionViewController {
   private var searchController = UISearchController(searchResultsController: nil)
   
   // MARK: - Value Types
+ // private lazy var dataSource: DataSource = makeDataSource()
   
+  private lazy var dataSource: DataSource = {
+    let dataSource = DataSource(collectionView: self.collectionView) { collectionView, indexPath, itemIdentifier in
+      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideosViewController.rawValue, for: indexPath) as? VideoCollectionViewCell
+      cell?.video = itemIdentifier
+      
+      return cell
+    }
+    
+    return dataSource
+  }()
   // MARK: - Life Cycles
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -110,11 +121,18 @@ extension VideosViewController {
     _ collectionView: UICollectionView,
     didSelectItemAt indexPath: IndexPath
   ) {
-    let video = videoList[indexPath.row]
+    ///5. Move to video url. 해당 아이템클릭시 사파리로 연결되도록.
+    guard let video = self.dataSource.itemIdentifier(for: indexPath) else {
+      return
+    }
+//    let video = videoList[indexPath.row]
+
+    
     guard let link = video.link else {
       print("Invalid link")
       return
     }
+    
     let safariViewController = SFSafariViewController(url: link)
     present(safariViewController, animated: true, completion: nil)
   }
