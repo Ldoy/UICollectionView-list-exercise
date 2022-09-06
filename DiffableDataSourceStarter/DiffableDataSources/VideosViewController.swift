@@ -55,30 +55,53 @@ class VideosViewController: UICollectionViewController {
     configureSearchController()
     configureLayout()
   }
-  
-  // MARK: - Functions
 }
+
+
+//MARK: - DataSource methods
+extension VideosViewController {
+  enum ReisableCellIdentifier: String {
+    case VideosViewController
+  }
+  
+  ///4. Make Item data for collectionview and cell provider.
+  private func makeDataSource() -> DataSource {
+    //Replace collectionView(_: numberOfItemsInSection:) method
+    let dataSource = DataSource(collectionView: self.collectionView) { collectionView, indexPath, itemIdentifier in
+      //itemIdentifier == Video objects
+      
+      //Replace collectionView(_: cellForItemAt:) method
+      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideosViewController.rawValue, for: indexPath) as? VideoCollectionViewCell
+      cell?.video = itemIdentifier
+      
+      return cell
+    }
+    
+    return dataSource
+  }
+}
+
 
 // MARK: - UICollectionViewDataSource
 extension VideosViewController {
-  override func collectionView(
-    _ collectionView: UICollectionView,
-    numberOfItemsInSection section: Int
-  ) -> Int {
-    return videoList.count
-  }
-  
-  override func collectionView(
-    _ collectionView: UICollectionView,
-    cellForItemAt indexPath: IndexPath
-  ) -> UICollectionViewCell {
-    let video = videoList[indexPath.row]
-    guard let cell = collectionView.dequeueReusableCell(
-      withReuseIdentifier: "VideoCollectionViewCell",
-      for: indexPath) as? VideoCollectionViewCell else { fatalError() }
-    cell.video = video
-    return cell
-  }
+//  override func collectionView(
+//    _ collectionView: UICollectionView,
+//    numberOfItemsInSection section: Int
+//  ) -> Int {
+//    return videoList.count
+//  }
+//
+//  override func collectionView(
+//    _ collectionView: UICollectionView,
+//    cellForItemAt indexPath: IndexPath
+//  ) -> UICollectionViewCell {
+//    let video = videoList[indexPath.row]
+//    guard let cell = collectionView.dequeueReusableCell(
+//      withReuseIdentifier: "VideoCollectionViewCell",
+//      for: indexPath) as? VideoCollectionViewCell else { fatalError() }
+//    cell.video = video
+//    return cell
+//  }
 }
 
 // MARK: - UICollectionViewDelegate

@@ -29,6 +29,7 @@
 import UIKit
 
 ///3. Adapt Hashable protocol and implement two methods.
+///All Hashable objects also be Equatable, so should implement == function.
 class Video: Hashable {
   static func == (lhs: Video, rhs: Video) -> Bool {
     lhs.id == rhs.id
