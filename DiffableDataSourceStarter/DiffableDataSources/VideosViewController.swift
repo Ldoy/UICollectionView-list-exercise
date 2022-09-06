@@ -29,15 +29,19 @@
 import UIKit
 import SafariServices
 
+enum Section {
+  case main
+}
+
 typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
 
-typealias Snaphot = NSDiffableDataSourceSnapshot<Section, Video>
+typealias snapshot = NSDiffableDataSourceSnapshot<Section, Video>
 
 class VideosViewController: UICollectionViewController {
   // MARK: - Properties
-  private var sections = Section.allSections
+  private var videoList = Video.allVideos
   private var searchController = UISearchController(searchResultsController: nil)
-  private lazy var dataSource = makeDataSource()
+  private lazy var dataSource = createDataSource()
   // MARK: - Value Types
   
   // MARK: - Life Cycles
@@ -50,58 +54,26 @@ class VideosViewController: UICollectionViewController {
   }
   
   // MARK: - Functions
-  func makeDataSource() -> DataSource {
-    // MARK: Same Role with collectionView(_:cellForItemAt:)
-    let dataSource = DataSource(
-      collectionView: self.collectionView, cellProvider:
-        { collectionView, indexPath, itemIdentifier in
-          let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "VideoCollectionViewCell", for: indexPath) as? VideoCollectionViewCell
-          
-          cell?.video = itemIdentifier
-          return cell
-        })
+  func createDataSource() -> DataSource {
+    let dataSource = DataSource(collectionView: self.collectionView) { collectionView, indexPath, itemIdentifier in
+      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "VideoCollectionViewCell", for: indexPath) as? VideoCollectionViewCell
+      cell?.video = itemIdentifier
+      return cell
+    }
+    
     return dataSource
   }
   
-  func applySnapshot(animatedDifferences: Bool =  true) {
-    var snapshot = Snaphot()
-    
-    snapshot.appendSections(sections)
-    
-    //MARK: Add the video array to the snapshot.
-    sections.forEach { section in
-      snapshot.appendItems(section.videos,
-                           toSection: section)
-
-    }
-    
-    //MARK: Tell the dataSource about the latest snapshot for updating and animating
-    self.dataSource.apply(snapshot,
-                          animatingDifferences: animatedDifferences)
+  func applySnapshot(animatingDifferences: Bool = true) {
+    var snapshot = snapshot()
+    snapshot.appendSections([.main])
+    snapshot.appendItems(self.videoList)
+    dataSource.apply(snapshot,
+                     animatingDifferences: animatingDifferences)
   }
 }
 
 // MARK: - UICollectionViewDataSource
-extension VideosViewController {
-//  override func collectionView(
-//    _ collectionView: UICollectionView,
-//    numberOfItemsInSection section: Int
-//  ) -> Int {
-//    return videoList.count
-//  }
-//
-//  override func collectionView(
-//    _ collectionView: UICollectionView,
-//    cellForItemAt indexPath: IndexPath
-//  ) -> UICollectionViewCell {
-//    let video = videoList[indexPath.row]
-//    guard let cell = collectionView.dequeueReusableCell(
-//      withReuseIdentifier: "VideoCollectionViewCell",
-//      for: indexPath) as? VideoCollectionViewCell else { fatalError() }
-//    cell.video = video
-//    return cell
-//  }
-}
 
 // MARK: - UICollectionViewDelegate
 extension VideosViewController {
@@ -111,7 +83,6 @@ extension VideosViewController {
   ) {
     //let video = videoList[indexPath.row]
     
-    //MARK: This ensures the app retrieves videos directly from the dataSource.
     guard let video = self.dataSource.itemIdentifier(for: indexPath) else {
       return
     }
@@ -120,6 +91,7 @@ extension VideosViewController {
       print("Invalid link")
       return
     }
+    
     let safariViewController = SFSafariViewController(url: link)
     present(safariViewController, animated: true, completion: nil)
   }
@@ -128,40 +100,21 @@ extension VideosViewController {
 // MARK: - UISearchResultsUpdating Delegate
 extension VideosViewController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
-    sections = filteredSections(for: searchController.searchBar.text)
-    //collectionView.reloadData()
-    applySnapshot()
+    videoList = filteredVideos(for: searchController.searchBar.text)
+    collectionView.reloadData()
   }
   
-  func filteredSections(for queryOrNil: String?) -> [Section] {
-    let sections = Section.allSections
+  func filteredVideos(for queryOrNil: String?) -> [Video] {
+    let videos = Video.allVideos
     guard
       let query = queryOrNil,
-      !query.isEmpty else {
-      return sections
+      !query.isEmpty
+      else {
+        return videos
     }
-    
-    return sections.filter { section in
-      var mathces = section.title.lowercased().contains(query.lowercased())
-      
-      for video in section.videos {
-        if video.title.lowercased().contains(query.lowercased()) {
-          mathces = true
-          break
-        }
-      }
-      return mathces
+    return videos.filter {
+      return $0.title.lowercased().contains(query.lowercased())
     }
-//    let videos = self.sections
-//    guard
-//      let query = queryOrNil,
-//      !query.isEmpty
-//    else {
-//      return videos
-//    }
-//    return videos.filter {
-//      return $0.title.lowercased().contains(query.lowercased())
-//    }
   }
   
   func configureSearchController() {
@@ -178,15 +131,22 @@ extension VideosViewController {
   private func configureLayout() {
     collectionView.collectionViewLayout = UICollectionViewCompositionalLayout(sectionProvider: { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
       let isPhone = layoutEnvironment.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.phone
+      
       let size = NSCollectionLayoutSize(
         widthDimension: NSCollectionLayoutDimension.fractionalWidth(1),
         heightDimension: NSCollectionLayoutDimension.absolute(isPhone ? 280 : 250)
       )
+      
       let itemCount = isPhone ? 1 : 3
+      
       let item = NSCollectionLayoutItem(layoutSize: size)
+      
       let group = NSCollectionLayoutGroup.horizontal(layoutSize: size, subitem: item, count: itemCount)
+      
       let section = NSCollectionLayoutSection(group: group)
+      
       section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+      
       section.interGroupSpacing = 10
       return section
     })

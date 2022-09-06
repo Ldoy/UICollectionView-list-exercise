@@ -1,4 +1,4 @@
-/// Copyright (c) 2022 Razeware LLC
+/// Copyright (c) 2020 Razeware LLC
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -28,39 +28,38 @@
 
 import UIKit
 
-//enum Section {
-//  case main
-//}
-
-class Section: Hashable {
-    var id = UUID()
-    
-    var title: String
-    var videos: [Video]
-    
-    init(title: String, videos: [Video]) {
-        self.title = title
-        self.videos = videos
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    static func == (lhs: Section, rhs: Section) -> Bool {
-        lhs.id == rhs.id
-    }
+class Video: Hashable {
+  var id = UUID()
+  var title: String
+  var thumbnail: UIImage?
+  var lessonCount: Int
+  var link: URL?
+  
+  init(title: String, thumbnail: UIImage? = nil, lessonCount: Int, link: URL?) {
+    self.title = title
+    self.thumbnail = thumbnail
+    self.lessonCount = lessonCount
+    self.link = link
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(self.id)
+  }
+  
+ static func == (lhs: Video, rhs: Video) -> Bool{
+   lhs.id == rhs.id
+  }
 }
 
-extension Section {
-    static let allSections: [Section] = [
-        Section(title: "SwiftUI", videos:
-    [Video(
+// MARK: - Video Sample Data
+extension Video {
+  static let allVideos = [
+    Video(
       title: "SwiftUI",
       thumbnail: UIImage(named: "swiftui"),
       lessonCount: 37,
       link: URL(string: "https://www.raywenderlich.com/4001741-swiftui")
-    )]), Section(title: "UIKit", videos: [
+    ),
     Video(
       title: "Data Structures & Algorithms in Swift",
       thumbnail: UIImage(named: "datastructures"),
@@ -78,7 +77,7 @@ extension Section {
       thumbnail: UIImage(named: "fastlane"),
       lessonCount: 44,
       link: URL(string: "https://www.raywenderlich.com/1259223-fastlane-for-ios")
-    )]), Section(title: "ect", videos: [
+    ),
     Video(
       title: "Machine Learning in iOS",
       thumbnail: UIImage(named: "machinelearning"),
@@ -108,7 +107,6 @@ extension Section {
       thumbnail: UIImage(named: "controls"),
       lessonCount: 31,
       link: URL(string: "https://www.raywenderlich.com/5298-reproducing-popular-ios-controls")
-    )])
+    )
   ]
 }
-

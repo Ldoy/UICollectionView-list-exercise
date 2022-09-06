@@ -33,7 +33,6 @@ class VideoCollectionViewCell: UICollectionViewCell {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var subtitleLabel: UILabel!
   
-  //MARK: - Use Property Observer for giving data.
   var video: Video? {
     didSet {
       thumbnailView.image = video?.thumbnail
