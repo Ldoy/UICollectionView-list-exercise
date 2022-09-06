@@ -29,19 +29,23 @@
 import UIKit
 import SafariServices
 
+
+///1. Implementation to define collectionview section
 enum Section {
   case main
 }
 
+///2. Implementation. You should use Hasable protocol adapted type.
+///Video type is already implemented
+///Video type acts as item. This would use in collectionview item.
+///Video has name, thumbnail url etc.
 typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
-
-typealias snapshot = NSDiffableDataSourceSnapshot<Section, Video>
 
 class VideosViewController: UICollectionViewController {
   // MARK: - Properties
   private var videoList = Video.allVideos
   private var searchController = UISearchController(searchResultsController: nil)
-  private lazy var dataSource = createDataSource()
+  
   // MARK: - Value Types
   
   // MARK: - Life Cycles
@@ -50,30 +54,32 @@ class VideosViewController: UICollectionViewController {
     view.backgroundColor = .white
     configureSearchController()
     configureLayout()
-    applySnapshot()
   }
   
   // MARK: - Functions
-  func createDataSource() -> DataSource {
-    let dataSource = DataSource(collectionView: self.collectionView) { collectionView, indexPath, itemIdentifier in
-      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "VideoCollectionViewCell", for: indexPath) as? VideoCollectionViewCell
-      cell?.video = itemIdentifier
-      return cell
-    }
-    
-    return dataSource
-  }
-  
-  func applySnapshot(animatingDifferences: Bool = true) {
-    var snapshot = snapshot()
-    snapshot.appendSections([.main])
-    snapshot.appendItems(self.videoList)
-    dataSource.apply(snapshot,
-                     animatingDifferences: animatingDifferences)
-  }
 }
 
 // MARK: - UICollectionViewDataSource
+extension VideosViewController {
+  override func collectionView(
+    _ collectionView: UICollectionView,
+    numberOfItemsInSection section: Int
+  ) -> Int {
+    return videoList.count
+  }
+  
+  override func collectionView(
+    _ collectionView: UICollectionView,
+    cellForItemAt indexPath: IndexPath
+  ) -> UICollectionViewCell {
+    let video = videoList[indexPath.row]
+    guard let cell = collectionView.dequeueReusableCell(
+      withReuseIdentifier: "VideoCollectionViewCell",
+      for: indexPath) as? VideoCollectionViewCell else { fatalError() }
+    cell.video = video
+    return cell
+  }
+}
 
 // MARK: - UICollectionViewDelegate
 extension VideosViewController {
@@ -81,17 +87,11 @@ extension VideosViewController {
     _ collectionView: UICollectionView,
     didSelectItemAt indexPath: IndexPath
   ) {
-    //let video = videoList[indexPath.row]
-    
-    guard let video = self.dataSource.itemIdentifier(for: indexPath) else {
-      return
-    }
-    
+    let video = videoList[indexPath.row]
     guard let link = video.link else {
       print("Invalid link")
       return
     }
-    
     let safariViewController = SFSafariViewController(url: link)
     present(safariViewController, animated: true, completion: nil)
   }
@@ -131,22 +131,15 @@ extension VideosViewController {
   private func configureLayout() {
     collectionView.collectionViewLayout = UICollectionViewCompositionalLayout(sectionProvider: { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
       let isPhone = layoutEnvironment.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.phone
-      
       let size = NSCollectionLayoutSize(
         widthDimension: NSCollectionLayoutDimension.fractionalWidth(1),
         heightDimension: NSCollectionLayoutDimension.absolute(isPhone ? 280 : 250)
       )
-      
       let itemCount = isPhone ? 1 : 3
-      
       let item = NSCollectionLayoutItem(layoutSize: size)
-      
       let group = NSCollectionLayoutGroup.horizontal(layoutSize: size, subitem: item, count: itemCount)
-      
       let section = NSCollectionLayoutSection(group: group)
-      
       section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-      
       section.interGroupSpacing = 10
       return section
     })

@@ -28,7 +28,16 @@
 
 import UIKit
 
+///3. Adapt Hashable protocol and implement two methods.
 class Video: Hashable {
+  static func == (lhs: Video, rhs: Video) -> Bool {
+    lhs.id == rhs.id
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
+  
   var id = UUID()
   var title: String
   var thumbnail: UIImage?
@@ -40,14 +49,6 @@ class Video: Hashable {
     self.thumbnail = thumbnail
     self.lessonCount = lessonCount
     self.link = link
-  }
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(self.id)
-  }
-  
- static func == (lhs: Video, rhs: Video) -> Bool{
-   lhs.id == rhs.id
   }
 }
 
