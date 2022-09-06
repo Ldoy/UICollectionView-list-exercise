@@ -80,21 +80,48 @@ extension AlbumDetailViewController {
   }
 
   func generateLayout() -> UICollectionViewLayout {
+    /// item Size
+    /// Standard of fractionWidth/Height is group where they are belonged to.
     let itemSize = NSCollectionLayoutSize(
       widthDimension: .fractionalWidth(1.0),
       heightDimension: .fractionalHeight(1.0))
     let fullPhotoItem = NSCollectionLayoutItem(layoutSize: itemSize)
-
+    
+    fullPhotoItem.contentInsets = NSDirectionalEdgeInsets(
+      top: 2,
+      leading: 2,
+      bottom: 2,
+      trailing: 2)
+    
+    /// group Size
     let groupSize = NSCollectionLayoutSize(
       widthDimension: .fractionalWidth(1.0),
-      heightDimension: .fractionalWidth(2/3))
-    let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: fullPhotoItem, count: 1)
-
+      heightDimension: .fractionalWidth(1/3))
+    let group = NSCollectionLayoutGroup.horizontal(
+      layoutSize: groupSize,
+      subitem: fullPhotoItem,
+      count: 2
+    )
+    
+    /// Create Section
     let section = NSCollectionLayoutSection(group: group)
-
     let layout = UICollectionViewCompositionalLayout(section: section)
     return layout
   }
+  
+  func generateLayoutVewsionTwo -> UICollectionViewLayout {
+    let item = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalWidth(2/3))
+    
+    let fullPhotoItem = NSCollectionLayoutItem(layoutSize: item)
+    fullPhotoItem.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+    
+    let mainItem = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(2/3), heightDimension: .fractionalHeight(1.0)))
+    mainItem.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+    
+    
+
+  }
+
 
   func snapshotForCurrentState() -> NSDiffableDataSourceSnapshot<Section, AlbumDetailItem> {
     var snapshot = NSDiffableDataSourceSnapshot<Section, AlbumDetailItem>()
