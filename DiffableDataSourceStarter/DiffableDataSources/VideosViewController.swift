@@ -40,23 +40,22 @@ enum Section {
 ///Video type acts as item. This would use in collectionview item.
 ///Video has name, thumbnail url etc.
 typealias DataSource = UICollectionViewDiffableDataSource<Section, Video>
+typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Video>
 
 class VideosViewController: UICollectionViewController {
   // MARK: - Properties
-  private var videoList = Video.allVideos
+  private var videoList = Video.allVideos //video sample data
   private var searchController = UISearchController(searchResultsController: nil)
-  
   // MARK: - Value Types
- // private lazy var dataSource: DataSource = makeDataSource()
-  
+//  private lazy var dataSource: DataSource = makeDataSource()
   private lazy var dataSource: DataSource = {
     let dataSource = DataSource(collectionView: self.collectionView) { collectionView, indexPath, itemIdentifier in
-      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideosViewController.rawValue, for: indexPath) as? VideoCollectionViewCell
+      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideoCollectionViewCell.rawValue, for: indexPath) as? VideoCollectionViewCell
       cell?.video = itemIdentifier
-      
+
       return cell
     }
-    
+
     return dataSource
   }()
   // MARK: - Life Cycles
@@ -65,6 +64,7 @@ class VideosViewController: UICollectionViewController {
     view.backgroundColor = .white
     configureSearchController()
     configureLayout()
+    applySnapShot()
   }
 }
 
@@ -72,7 +72,7 @@ class VideosViewController: UICollectionViewController {
 //MARK: - DataSource methods
 extension VideosViewController {
   enum ReisableCellIdentifier: String {
-    case VideosViewController
+    case VideoCollectionViewCell
   }
   
   ///4. Make Item data for collectionview and cell provider.
@@ -82,13 +82,20 @@ extension VideosViewController {
       //itemIdentifier == Video objects
       
       //Replace collectionView(_: cellForItemAt:) method
-      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideosViewController.rawValue, for: indexPath) as? VideoCollectionViewCell
+      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReisableCellIdentifier.VideoCollectionViewCell.rawValue, for: indexPath) as? VideoCollectionViewCell
       cell?.video = itemIdentifier
       
       return cell
     }
     
     return dataSource
+  }
+  
+  private func applySnapShot() {
+    var snapShot = Snapshot()
+    snapShot.appendSections([.main])
+    snapShot.appendItems(videoList)
+    self.dataSource.apply(snapShot, animatingDifferences: false)
   }
 }
 
